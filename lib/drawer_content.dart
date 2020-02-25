@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import './main_seller_screen.dart';
 class DrawerContent extends StatefulWidget {
   @override
   _DrawerContentState createState() => _DrawerContentState();
@@ -28,7 +28,11 @@ class _DrawerContentState extends State<DrawerContent> {
             title: Text("Buyer Portal"),
           ),
           ListTile(
-            onTap: (){},
+            onTap: (){
+              Navigator.of(context).push(MaterialPageRoute(builder: (_){
+                return MainSellerScreen();
+              }));
+            },
             leading: Icon(Icons.supervised_user_circle),
             title: Text("Seller Portal"),
           ),
