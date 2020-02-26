@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import './main_seller_screen.dart';
 class DrawerContent extends StatefulWidget {
+  var status;
+  DrawerContent(this.status);
   @override
-  _DrawerContentState createState() => _DrawerContentState();
+  _DrawerContentState createState() => _DrawerContentState(status);
 }
 
 class _DrawerContentState extends State<DrawerContent> {
+  var logged;
+  _DrawerContentState(this.logged);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -29,9 +33,16 @@ class _DrawerContentState extends State<DrawerContent> {
           ),
           ListTile(
             onTap: (){
-              Navigator.of(context).push(MaterialPageRoute(builder: (_){
-                return MainSellerScreen();
-              }));
+              if(logged){
+                Navigator.of(context).push(MaterialPageRoute(builder: (_){
+                  return MainSellerScreen();
+                }));
+              }
+              else{
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text("Please register"),
+                ));
+              Navigator.pop(context);}
             },
             leading: Icon(Icons.supervised_user_circle),
             title: Text("Seller Portal"),
