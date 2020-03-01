@@ -1,6 +1,6 @@
 # agro_book
 
-A new Flutter project.
+A simple e-commerce app with firebase database and storage
 
 ## Getting Started
 
