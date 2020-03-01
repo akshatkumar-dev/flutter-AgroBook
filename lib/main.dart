@@ -1,94 +1,130 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import './show_products.dart';
 import './drawer_content.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import './register_screen.dart';
-void main()=>runApp(MyApp());
+import './helper/helper_functions.dart';
+import './helper/product_model.dart';
+import './product_details_screen.dart';
+import './view_cart_screen.dart';
+import './all_buyer_transactions.dart';
+
+void main() => runApp(MyApp());
+
 class MyApp extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  var data;
-  var parseData = [];
+  List<Product> productList;
   var isLoading = true;
-  var isLoggedIn = false;
-  Future<void> fetchData() async{
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.remove("isLoggedIn");
-    setState(() {
-          isLoggedIn = pref.getBool("isLoggedIn") ?? false;
-    });
-    if(parseData.length!=0){parseData.clear();}
-    const DATABASE_URL = "https://agro-book.firebaseio.com/seller.json";
-    var response = await http.get(DATABASE_URL);
-    data = json.decode(response.body);
-    data.forEach((key,value){
-      parseData.add(value);
-    });
-    setState(() {
-      isLoading = false;
-    });
-    return;
-  }
-  
   @override
   void initState() {
+    HelperFunctions().initializeId();
+    HelperFunctions().fetchAllProducts().then((List<Product> value) {
+      setState(() {
+        isLoading = false;
+        productList = value;
+      });
+    });
     // TODO: implement initState
-    fetchData();
+
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        accentColor: Colors.red
-      ),
+      routes: {"/cart": (context) => ViewCartScreen()},
+      theme: ThemeData(primarySwatch: Colors.green, accentColor: Colors.red),
       home: Scaffold(
-        drawer: Drawer(
-          child: DrawerContent(isLoggedIn)
-        ),
-        appBar: AppBar(
-          actions: !isLoggedIn?<Widget>[
-            Builder(
-                builder:(context)=> IconButton(
-                icon: Icon(Icons.perm_identity),
-                onPressed: () async{
-                  var x = await Navigator.of(context).push(MaterialPageRoute(builder: (_){
-                      return RegisterScreen();
-                  }));
-                  setState(() {
-                    isLoggedIn = x;
-                  });
-                },
-              ),
+        drawer: Drawer(child: DrawerContent()),
+        appBar: AppBar(title: Text("Agro Book"), actions: <Widget>[
+          Builder(
+            builder: (ctxx) => IconButton(
+              icon: Icon(Icons.shopping_cart),
+              onPressed: () async {
+                Navigator.of(ctxx).push(MaterialPageRoute(builder: (ctx) {
+                  return ViewCartScreen();
+                }));
+              },
             ),
-            IconButton(
-              icon: Icon(Icons.shopping_cart),
-              onPressed: (){},
-            )
-          ]:<Widget>[
-            IconButton(
-              icon: Icon(Icons.shopping_cart),
-              onPressed: (){},
-            )
-          ], 
-          title: Text("Agro Book"),
-        ),
-      body: isLoading? Center(child:CircularProgressIndicator()): RefreshIndicator(
-              onRefresh: fetchData,
-              child: ListView(
-            children: <Widget>[
-              ...parseData.map((value){
-                return ShowProduct(value["title"],value["subtitle"],double.parse(value["price"]));
-              })
-            ],
           ),
-      ),
+          productList == null
+              ? IconButton(
+                  icon: Icon(Icons.refresh),
+                  onPressed: () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    var newValue = await HelperFunctions().fetchAllProducts();
+                    setState(() {
+                      isLoading = false;
+                      productList = newValue;
+                    });
+                  },
+                )
+              : Text(""),
+          Builder(
+            builder: (ctxx) => IconButton(
+              icon: Icon(Icons.monetization_on),
+              onPressed: () {
+                Navigator.of(ctxx).push(MaterialPageRoute(builder: (ctx) {
+                  return AllBuyerTransactions();
+                }));
+              },
+            ),
+          )
+        ]),
+        body: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
+                onRefresh: () async {
+                  var newValue = await HelperFunctions().fetchAllProducts();
+                  setState(() {
+                    productList = newValue;
+                  });
+                  return;
+                },
+                child: productList == null
+                    ? Center(
+                        child: Text("No products available"),
+                      )
+                    : ListView.builder(
+                        itemCount: productList.length,
+                        itemBuilder: (ctx, i) {
+                          return InkWell(
+                              splashColor: Colors.green,
+                              onTap: () {
+                                Navigator.of(ctx)
+                                    .push(MaterialPageRoute(builder: (ctxx) {
+                                  return ProductDetailsScreen(productList[i]);
+                                }));
+                              },
+                              child: Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ListTile(
+                                    leading: productList[i].imageUrl.length == 0
+                                        ? Image.asset(
+                                            "assets/images/noimage.jpg",
+                                            fit: BoxFit.cover,
+                                          )
+                                        : CachedNetworkImage(
+                                            fit: BoxFit.cover,
+                                            imageUrl: productList[i].imageUrl,
+                                            placeholder: (context, url) =>
+                                                CircularProgressIndicator(),
+                                          ),
+                                    title: Text(productList[i].title),
+                                    subtitle:
+                                        Text(productList[i].stock.toString()),
+                                    trailing:
+                                        Text(productList[i].price.toString()),
+                                  ),
+                                ),
+                              ));
+                        },
+                      )),
       ),
     );
   }
