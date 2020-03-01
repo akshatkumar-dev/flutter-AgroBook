@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:agro_book/helper/address_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import './product_model.dart';
@@ -12,6 +13,8 @@ class HelperFunctions{
   var _letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-_";
   static var selectedCartItems = List<int>();
   static var currentId;
+  static var height;
+  static var width;
   DatabaseReference _productsReference = FirebaseDatabase.instance.reference().child("products");
   DatabaseReference _sellerReference = FirebaseDatabase.instance.reference().child("sellers");
   DatabaseReference _buyerReference = FirebaseDatabase.instance.reference().child("buyers");
@@ -175,11 +178,16 @@ class HelperFunctions{
 
   Future<List<Product>> _getListOfProduct(List<String> productIds) async {
     var allProducts = await fetchAllProducts();
-    var cartItems = allProducts.where((product){
-      if(productIds.contains(product.id)){return true;}
-      return false;
-    }).toList();
-    return cartItems;
+    var newList = List<Product>();
+    productIds.forEach((id){
+      allProducts.forEach((product){
+        if(product.id == id){
+          newList.add(product);
+          return;
+        }
+      });
+    });
+    return newList;
   }
   Future<List<Product>> getAllCartItems() async {
     var id = HelperFunctions.currentId;
@@ -233,7 +241,7 @@ class HelperFunctions{
     return address;
   }
 
-  Future<void> purchaseProduct(List<Product> products) async{
+  Future<void> purchaseProduct(List<Product> products,Address address) async{
     var id = HelperFunctions.currentId;
     var reference = _transactionReference.child(id);
     List<Map<String,String>> toUpload = List<Map<String,String>>();
@@ -241,7 +249,8 @@ class HelperFunctions{
       var map = {
         "id":product.id,
         "quantity":product.quantity.toString(),
-        "sellerId":product.sellerId
+        "sellerId":product.sellerId,
+        "deliveryAddress": address.encodeAddress()
       };
       toUpload.add(map);
     });
@@ -251,6 +260,7 @@ class HelperFunctions{
   Future<List<Product>> fetchAllTransactions() async {
     var id = HelperFunctions.currentId;
     var datasnapshot = await _transactionReference.once();
+    if(datasnapshot.value==null){return null;}
     Map<dynamic,dynamic> nextValue = datasnapshot.value;
     List<String> productIds = List<String>();
     List<String> quantity = List<String>();
@@ -281,12 +291,14 @@ class HelperFunctions{
     var id = HelperFunctions.currentId;
     var reference = _transactionReference.child(id);
     var datasnapshot = await reference.once();
+    if(datasnapshot.value == null) {return null;}
     Map<dynamic,dynamic> data = datasnapshot.value;
     var productIds = List<String>();
     var quantity = List<String>();
     data.forEach((key,value){
       value.forEach((f){
         productIds.add(f["id"]);
+        print(f["id"]);
         quantity.add(f["quantity"]);
       });
     });

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import './main_seller_screen.dart';
-import './test_firebase.dart';
 
 class DrawerContent extends StatefulWidget {
   @override
@@ -25,11 +24,6 @@ class _DrawerContentState extends State<DrawerContent> {
             ),
           ),
           ListTile(
-            onTap: () {},
-            leading: Icon(Icons.supervised_user_circle),
-            title: Text("Buyer Portal"),
-          ),
-          ListTile(
             onTap: () {
               Navigator.pop(context);
               Navigator.of(context).push(MaterialPageRoute(builder: (_) {
@@ -39,15 +33,7 @@ class _DrawerContentState extends State<DrawerContent> {
             leading: Icon(Icons.supervised_user_circle),
             title: Text("Seller Portal"),
           ),
-          ListTile(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                return TestWidget();
-              }));
-            },
-            leading: Icon(Icons.rate_review),
-            title: Text("Rate Us"),
-          )
+          
         ],
       ),
     );

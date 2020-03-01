@@ -72,6 +72,7 @@ class _ViewCartScreenState extends State<ViewCartScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var width = HelperFunctions.width;
     return Scaffold(
         appBar: AppBar(title: Text("Cart"), actions: <Widget>[
           products == null
@@ -113,109 +114,72 @@ class _ViewCartScreenState extends State<ViewCartScreen> {
                         children: <Widget>[
                           Expanded(
                             child: ListView.builder(
-                                itemCount: products.length,
-                                itemBuilder: (ctx, i) {
-                                  return Container(
-                                    margin: EdgeInsets.all(10),
-                                    width: double.infinity,
-                                    child: Column(
-                                      children: <Widget>[
-                                        products[i].imageUrl.length == 0
-                                            ? Image.asset(
-                                                "assets/images/noimage.jpg",
-                                                width: double.infinity,
-                                                height: 200)
-                                            : CachedNetworkImage(
-                                                width: double.infinity,
-                                                height: 200,
-                                                imageUrl: products[i].imageUrl,
-                                                placeholder: (context, url) =>
-                                                    CircularProgressIndicator(),
-                                              ),
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                                color: Colors.green),
-                                            width: double.infinity,
-                                            padding: EdgeInsets.all(10),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: <Widget>[
-                                                Container(
-                                                  margin: EdgeInsets.only(
-                                                      right: 10),
-                                                  child: IconButton(
-                                                    icon: Icon(
-                                                      Icons.delete,
-                                                      color: Colors.white,
-                                                    ),
-                                                    onPressed: () {
-                                                      confirmDialog(
-                                                          products[i].id);
-                                                    },
-                                                  ),
-                                                ),
-                                                Container(
-                                                    margin: EdgeInsets.only(
-                                                        right: 10),
-                                                    child: Text(
-                                                      products[i].title,
-                                                      style: TextStyle(
-                                                          fontSize: 20,
-                                                          color: Colors.white),
-                                                    )),
-                                                Container(
-                                                  margin: EdgeInsets.only(
-                                                      right: 10),
-                                                  padding: EdgeInsets.all(10),
-                                                  child: Column(
-                                                    children: <Widget>[
-                                                      Text(
-                                                        products[i]
-                                                            .price
-                                                            .toString(),
-                                                        style: TextStyle(
-                                                            fontSize: 20,
-                                                            color:
-                                                                Colors.white),
-                                                      ),
-                                                      Text(
-                                                        "x" +
-                                                            products[i]
-                                                                .quantity
-                                                                .toString(),
-                                                        style: TextStyle(
-                                                            fontSize: 18,
-                                                            color:
-                                                                Colors.white70),
-                                                      ),
-                                                      Text(
-                                                        (products[i].price *
-                                                                products[i]
-                                                                    .quantity)
-                                                            .toString(),
-                                                        style: TextStyle(
-                                                            fontSize: 20,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color:
-                                                                Colors.white),
-                                                      )
-                                                    ],
-                                                  ),
-                                                )
-                                              ],
+          itemCount: products.length,
+          itemBuilder: (ctx, i) {
+            return Dismissible(
+              key: Key(products[i].id),
+              background: Container(
+                  color: Colors.red,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[Container(padding: EdgeInsets.all(10),margin: EdgeInsets.all(10),child: Icon(Icons.delete)), Container(padding: EdgeInsets.all(10),margin: EdgeInsets.all(10),child: Icon(Icons.delete))],
+                  )),
+                  onDismissed: (direction) async {
+                    setState(() {
+                  isLoading = true;
+                });
+                var x = await HelperFunctions().removeItemsFromCart(products[i].id);
+                setState(() {
+                  products = x;
+                  totalPrice = HelperFunctions().calculateTotalPrice(products);
+                  isLoading = false;
+                });
+                  },
+                          child: Card(
+                child: (Row
+                (
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                  
+                  Container(
+                    width: width / 3,
+                    margin: EdgeInsets.only(right: 10),
+                    child: products[i].imageUrl.length == 0
+                                          ? Image.asset(
+                                              "assets/images/noimage.jpg",
+                                              fit: BoxFit.cover,
+                                            )
+                                          : CachedNetworkImage(
+                                              fit: BoxFit.cover,
+                                              imageUrl: products[i].imageUrl,
+                                              placeholder: (context, url) =>
+                                                  CircularProgressIndicator(),
                                             ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  );
-                                }),
+                  ),
+                  Container(
+                    width: width/3,
+                    child: Text(
+                      products[i].title,
+                      softWrap: true,
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.only(top: 10,bottom:10),
+                    margin: EdgeInsets.only(left: 5),
+                    child: Column(
+                      children: <Widget>[
+                        Text("₹ "+products[i].price.toString(),softWrap: true,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),),
+                        Text("x "+products[i].quantity.toString(),softWrap: true,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 14),),
+                        Text("₹ "+(products[i].price*products[i].quantity).toString(),softWrap:true,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.red),)
+                      ],
+                    ),
+                  )
+                ])),
+              ),
+            );
+          }),
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -223,7 +187,8 @@ class _ViewCartScreenState extends State<ViewCartScreen> {
                               Container(
                                   margin: EdgeInsets.all(10),
                                   child: Text(
-                                      "Total Price: " + totalPrice.toString())),
+                                    
+                                      "Total Price: ₹ " + totalPrice.toString(),style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red),)),
                               RaisedButton(
                                 textColor: Colors.white,
                                 padding: const EdgeInsets.all(0.0),
@@ -236,7 +201,7 @@ class _ViewCartScreenState extends State<ViewCartScreen> {
                                 onPressed: () {
                                   Navigator.of(context)
                                       .push(MaterialPageRoute(builder: (ctx) {
-                                    return CheckoutScreen(products);
+                                    return CheckoutScreen(products,totalPrice.toString());
                                   }));
                                 },
                               )

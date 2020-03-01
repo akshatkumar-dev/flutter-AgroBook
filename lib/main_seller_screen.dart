@@ -27,6 +27,7 @@ class _MainSellerScreenState extends State<MainSellerScreen> {
   }
   @override
   Widget build(BuildContext context) {
+    var width = HelperFunctions.width;
     return (
       Scaffold(
       appBar: AppBar(
@@ -80,31 +81,53 @@ class _MainSellerScreenState extends State<MainSellerScreen> {
               child: Text("No products added"),
             ):
            ListView.builder(
-            itemCount: productList.length,
-            itemBuilder: (ctx,i){
+          itemCount: productList.length,
+          itemBuilder: (ctx, i) {
             return InkWell(
               onTap: (){
-                Navigator.of(ctx).push(MaterialPageRoute(builder: (ctxx){
+                Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
                   return UpdateProductDetails(productList[i]);
                 }));
               },
-              child: Card(
-              child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ListTile(
-          leading: productList[i].imageUrl.length==0?
-          Image.asset("assets/images/noimage.jpg",fit: BoxFit.cover,): 
-          CachedNetworkImage(
-            fit: BoxFit.cover,
-            imageUrl: productList[i].imageUrl,
-            placeholder: (context,url)=>CircularProgressIndicator(),
-          ),
-          title: Text(productList[i].title),
-          subtitle: Text(productList[i].stock.toString()),
-          trailing: Text(productList[i].price.toString()),
-        ),
-      ),
-    ));
+                          child: Card(
+                child: (Row(
+                  children: <Widget>[
+                  Container(
+                    width: width / 3,
+                
+                    margin: EdgeInsets.only(right: 10),
+                    child: productList[i].imageUrl.length == 0
+                                          ? Image.asset(
+                                              "assets/images/noimage.jpg",
+                                              fit: BoxFit.cover,
+                                            )
+                                          : CachedNetworkImage(
+                                              fit: BoxFit.cover,
+                                              imageUrl: productList[i].imageUrl,
+                                              placeholder: (context, url) =>
+                                                  CircularProgressIndicator(),
+                                            ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    child: Column(
+                      children: <Widget>[
+                        Text(
+                          productList[i].title,
+                          style:
+                              TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
+                        Container( margin: EdgeInsets.only(bottom:8),child: Text(productList[i].stock.toString())),
+                        Text(
+                          "₹ "+ productList[i].price.toString(),
+                          style: TextStyle(fontSize: 18, color: Colors.red),
+                        )
+                      ],
+                    ),
+                  )
+                ])),
+              ),
+            );
           }),
           
       ),

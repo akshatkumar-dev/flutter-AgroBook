@@ -116,8 +116,12 @@ _UpdateProductDetailsState(this.product);
                         decoration: InputDecoration(labelText: "Product description"),
                         controller: descriptionController,
                         keyboardType: TextInputType.multiline,
+                        maxLines: null,
                       ),
-                      Text("Enter your delivery address. Please ensure the address is correct else the product cannot be delivered",softWrap: true,),
+                      Container(
+                        margin: EdgeInsets.all(10),
+                        padding: EdgeInsets.all(10),
+                        child: Text("Enter your delivery address. Please ensure the address is correct else the product cannot be delivered",softWrap: true,)),
                       TextField(
                         decoration: InputDecoration(
                           labelText: "House Number / Apartment number"

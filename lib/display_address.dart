@@ -7,15 +7,16 @@ class DisplayAddress extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Column(
+
         children: <Widget>[
-          Text("House/Apartment number: "+address.apartmentNumber),
-          Text("Block Number: "+address.blockNumber),
-          Text("House Name: "+address.houseName),
-          Text("Street Name: "+address.streetName),
-          Text("Locality Name: "+address.localityName),
-          Text("City Name:"+address.cityName),
-          Text("State Name: "+address.stateName),
-          Text("Pincode: "+address.pincode)
+          Container(margin:EdgeInsets.all(10),child: Text("House/Apartment number: "+address.apartmentNumber)),
+          Container(margin:EdgeInsets.all(10),child: Text("Block Number: "+address.blockNumber)),
+          Container(margin:EdgeInsets.all(10),child: Text("House Name: "+address.houseName)),
+          Container(margin:EdgeInsets.all(10),child: Text("Street Name: "+address.streetName)),
+          Container(margin:EdgeInsets.all(10),child: Text("Locality Name: "+address.localityName)),
+          Container(margin:EdgeInsets.all(10),child: Text("City Name:"+address.cityName)),
+          Container(margin:EdgeInsets.all(10),child: Text("State Name: "+address.stateName)),
+          Container(margin:EdgeInsets.all(10),child: Text("Pincode: "+address.pincode))
         ],
       ),
     );

@@ -15,6 +15,22 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      routes: {"/cart": (context) => ViewCartScreen()},
+      theme: ThemeData(primarySwatch: Colors.green, accentColor: Colors.red),
+      home: Home()
+    );
+  }
+}
+
+class Home extends StatefulWidget {
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   List<Product> productList;
   var isLoading = true;
   @override
@@ -30,13 +46,12 @@ class _MyAppState extends State<MyApp> {
 
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      routes: {"/cart": (context) => ViewCartScreen()},
-      theme: ThemeData(primarySwatch: Colors.green, accentColor: Colors.red),
-      home: Scaffold(
+    HelperFunctions.height = MediaQuery.of(context).size.height;
+    HelperFunctions.width = MediaQuery.of(context).size.width;
+    var width = HelperFunctions.width;
+    return Scaffold(
         drawer: Drawer(child: DrawerContent()),
         appBar: AppBar(title: Text("Agro Book"), actions: <Widget>[
           Builder(
@@ -90,42 +105,55 @@ class _MyAppState extends State<MyApp> {
                         child: Text("No products available"),
                       )
                     : ListView.builder(
-                        itemCount: productList.length,
-                        itemBuilder: (ctx, i) {
-                          return InkWell(
-                              splashColor: Colors.green,
-                              onTap: () {
-                                Navigator.of(ctx)
-                                    .push(MaterialPageRoute(builder: (ctxx) {
-                                  return ProductDetailsScreen(productList[i]);
-                                }));
-                              },
-                              child: Card(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: ListTile(
-                                    leading: productList[i].imageUrl.length == 0
-                                        ? Image.asset(
-                                            "assets/images/noimage.jpg",
-                                            fit: BoxFit.cover,
-                                          )
-                                        : CachedNetworkImage(
-                                            fit: BoxFit.cover,
-                                            imageUrl: productList[i].imageUrl,
-                                            placeholder: (context, url) =>
-                                                CircularProgressIndicator(),
-                                          ),
-                                    title: Text(productList[i].title),
-                                    subtitle:
-                                        Text(productList[i].stock.toString()),
-                                    trailing:
-                                        Text(productList[i].price.toString()),
-                                  ),
-                                ),
-                              ));
-                        },
-                      )),
-      ),
-    );
+          itemCount: productList.length,
+          itemBuilder: (ctx, i) {
+            return InkWell(
+              onTap: (){
+                Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
+                  return ProductDetailsScreen(productList[i]);
+                }));
+              },
+                          child: Card(
+                child: (Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                  Container(
+                    width: width / 3,
+                
+                    margin: EdgeInsets.only(right: 10),
+                    child: productList[i].imageUrl.length == 0
+                                          ? Image.asset(
+                                              "assets/images/noimage.jpg",
+                                              fit: BoxFit.cover,
+                                            )
+                                          : CachedNetworkImage(
+                                              fit: BoxFit.cover,
+                                              imageUrl: productList[i].imageUrl,
+                                              placeholder: (context, url) =>
+                                                  CircularProgressIndicator(),
+                                            ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    child: Column(
+                      children: <Widget>[
+                        Text(
+                          productList[i].title,
+                          style:
+                              TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
+                        Container( margin: EdgeInsets.only(bottom:8),child: Text(productList[i].stock.toString())),
+                        Text(
+                          "₹ "+ productList[i].price.toString(),
+                          style: TextStyle(fontSize: 18, color: Colors.red),
+                        )
+                      ],
+                    ),
+                  )
+                ])),
+              ),
+            );
+          }),),
+      );
   }
 }

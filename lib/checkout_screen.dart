@@ -5,9 +5,10 @@ import './helper/helper_functions.dart';
 import './final_place_order_screen.dart';
 class CheckoutScreen extends StatefulWidget {
   List<Product> prods;
-  CheckoutScreen(this.prods);
+  String tot;
+  CheckoutScreen(this.prods,this.tot);
   @override
-  _CheckoutScreenState createState() => _CheckoutScreenState(prods);
+  _CheckoutScreenState createState() => _CheckoutScreenState(prods,tot);
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
@@ -21,7 +22,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   TextEditingController localityNameController = TextEditingController(text: "");
   var saveAddress = false;
   List<Product> products;
-  _CheckoutScreenState(this.products);
+  String totalPrice;
+  _CheckoutScreenState(this.products,this.totalPrice);
   @override
   void initState() {
     // TODO: implement initState
@@ -141,7 +143,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         await HelperFunctions().saveAddress(newAddress);
                       }
                       Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
-                        return FinalPlaceOrderScreen(delivery: address,products: products,);
+                        return FinalPlaceOrderScreen(delivery: address,products: products,total:totalPrice);
                       }));
                     },
                   )
